@@ -6,8 +6,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,7 +30,9 @@ public class MainActivity extends Activity {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.openai.com/")
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(
+                        GsonConverterFactory.create()
+                )
                 .build();
 
         OpenAiApiService apiService =
@@ -40,10 +40,12 @@ public class MainActivity extends Activity {
 
         generateButton.setOnClickListener(v -> {
 
-            String userPrompt =
-                    promptInput.getText().toString().trim();
+            String prompt =
+                    promptInput.getText()
+                            .toString()
+                            .trim();
 
-            if (userPrompt.isEmpty()) {
+            if (prompt.isEmpty()) {
                 resultText.setText("Введите промпт!");
                 return;
             }
@@ -52,7 +54,7 @@ public class MainActivity extends Activity {
             resultText.setText("Генерация...");
 
             ChatRequest request =
-                    new ChatRequest(userPrompt);
+                    new ChatRequest(prompt);
 
             apiService.getCompletion(request)
                     .enqueue(new Callback<ChatResponse>() {
@@ -65,17 +67,21 @@ public class MainActivity extends Activity {
                             generateButton.setEnabled(true);
 
                             if (!response.isSuccessful()) {
+
                                 resultText.setText(
-                                        "Ошибка API: " + response.code()
+                                        "Ошибка API: HTTP "
+                                                + response.code()
                                 );
+
                                 return;
                             }
 
-                            ChatResponse body = response.body();
+                            ChatResponse body =
+                                    response.body();
 
                             if (body == null) {
                                 resultText.setText(
-                                        "Ошибка: пустой ответ сервера"
+                                        "Ошибка: пустой ответ"
                                 );
                                 return;
                             }
@@ -84,27 +90,26 @@ public class MainActivity extends Activity {
                                     body.choices.isEmpty()) {
 
                                 resultText.setText(
-                                        "Ошибка: сервер не вернул результат"
+                                        "Ошибка: нет результата"
                                 );
                                 return;
                             }
 
                             if (body.choices.get(0) == null ||
                                     body.choices.get(0).message == null ||
-                                    body.choices.get(0).message.content == null) {
+                                    body.choices.get(0)
+                                            .message.content == null) {
 
                                 resultText.setText(
-                                        "Ошибка: неправильный ответ API"
+                                        "Ошибка: неправильный ответ"
                                 );
                                 return;
                             }
 
-                            String answer =
+                            resultText.setText(
                                     body.choices.get(0)
-                                            .message
-                                            .content;
-
-                            resultText.setText(answer);
+                                            .message.content
+                            );
                         }
 
                         @Override
@@ -114,11 +119,15 @@ public class MainActivity extends Activity {
 
                             generateButton.setEnabled(true);
 
+                            String error = t.getMessage();
+
+                            if (error == null) {
+                                error = "Неизвестная ошибка";
+                            }
+
                             resultText.setText(
-                                    "Ошибка сети:\n" +
-                                    t.getClass().getSimpleName() +
-                                    "\n" +
-                                    t.getMessage()
+                                    "Ошибка подключения:\n"
+                                            + error
                             );
                         }
                     });
