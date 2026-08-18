@@ -6,7 +6,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
 public interface OpenAiApiService {
-    @Headers("Authorization: Bearer ВАШ_API_КЛЮЧ_ЗДЕСЬ")
+    @Headers("Authorization: Bearer your_api_key_here")
     @POST("v1/chat/completions")
     Call<ChatResponse> getCompletion(@Body ChatRequest request);
 }
