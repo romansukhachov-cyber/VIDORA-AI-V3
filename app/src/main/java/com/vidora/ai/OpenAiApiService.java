@@ -9,5 +9,7 @@ public interface OpenAiApiService {
 
     @Headers("Content-Type: application/json")
     @POST("v1/chat/completions")
-    Call<ChatResponse> getCompletion(@Body ChatRequest request);
+    Call<ChatResponse> getCompletion(
+            @Body ChatRequest request
+    );
 }
